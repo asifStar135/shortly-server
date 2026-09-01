@@ -1,0 +1,77 @@
+HELP.md
+
+# ==========================================
+# Maven Build Target
+# ==========================================
+target/
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# ==========================================
+# IntelliJ IDEA
+# ==========================================
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/resources/archetype-resources/src/main/java/**
+# If you prefer to keep your shared run configurations, uncomment the line below:
+# !.idea/runConfigurations/
+
+# ==========================================
+# Spring Boot / Application Configs (Secrets)
+# ==========================================
+### Exclude local properties containing actual secrets
+### (Keep your template/production application.properties tracked, but block local overrides)
+*local.properties
+*secret.properties
+application-local.properties
+application-dev.properties
+
+# Log files
+*.log
+logs/
+
+# Production build and caches
+build/
+dist/
+.eslintcache
+.stylelintcache
+.turbo/
+
+# TypeScript declaration cache
+*.tsbuildinfo
+next-env.d.ts
+
+# ==========================================
+# Operating System Files
+# ==========================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.lnk
+
+# ==========================================
+# Other IDEs (Optional safety net)
+# ==========================================
+# Eclipse
+.metadata
+.classpath
+.project
+.settings/
+*.launch
+
+# VS Code
+.vscode/
