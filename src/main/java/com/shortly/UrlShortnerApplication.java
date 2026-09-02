@@ -8,7 +8,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 public class UrlShortnerApplication {
     public static void main(String[] args) {
-        System.out.println("DEBUG - SYSTEM ENV URL: " + System.getenv("SPRING_DATASOURCE_URL"));
         SpringApplication.run(UrlShortnerApplication.class, args);
     }
 }

@@ -29,7 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = extractTokenFromCookies(request.getCookies());
-        System.out.println(token);
+//        System.out.println(token);
         String username = null;
 
         if (token != null){
@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if(username != null && SecurityContextHolder.getContext().getAuthentication() == null){
             UserDetails details = userDetailService.loadUserByUsername(username);
-            System.out.println(username + details);
+//            System.out.println(username + details);
 
             if(jwtService.validateToken(token, details)){
                 UsernamePasswordAuthenticationToken authToken =

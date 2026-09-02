@@ -25,10 +25,15 @@ public class UrlController {
         this.urlService = service;
     }
 
+    @GetMapping("/")
+    public ResponseEntity<String> checkAPI(){
+        System.out.println("API status checked ✅");
+        return ResponseEntity.ok("Shortly API is running...✅🚀");
+    }
+
     @GetMapping("/get/{shortCode}")
     ResponseEntity<?> getUrl(@PathVariable String shortCode) throws URISyntaxException{
         String longUrl = urlService.getUrl(shortCode);
-        System.out.print("Get url hit");
 
         URI targetUri = new URI(longUrl);
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -49,12 +54,12 @@ public class UrlController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UrlMap> getUserUri(@PathVariable(value = "id") Integer id, Authentication auth){
+    public ResponseEntity<UrlMap> getUserUri(@PathVariable(value = "id") Long id, Authentication auth){
         return ResponseEntity.ok(urlService.getUrlById(id, auth.getName()));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UrlMap> editUrlDetails(@PathVariable(value = "id") Integer id,
+    public ResponseEntity<UrlMap> editUrlDetails(@PathVariable(value = "id") Long id,
                                                  @RequestBody EditUrlRequest request, Authentication auth){
         return ResponseEntity.ok(urlService.editUrlDetails(id, request, auth.getName()));
     }
