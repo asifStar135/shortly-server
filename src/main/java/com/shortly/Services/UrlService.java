@@ -68,24 +68,6 @@ public class UrlService {
         urlRepo.deleteByIdAndUserUsername(id, username);
     }
 
-    public String disableUrl(String shortCode, String username) {
-        UrlMap urlData = urlRepo.findByShortCodeAndIsActiveAndUserUsername(shortCode, true, username).
-                orElseThrow(()-> new UrlNotFoundException(shortCode));
-
-        urlData.setActive(false);
-        urlRepo.save(urlData);
-        return "Url disabled successfully";
-    }
-
-    public String enableUrl(String shortCode, String username) {
-        UrlMap urlData = urlRepo.findByShortCodeAndIsActiveAndUserUsername(shortCode, false, username).
-                orElseThrow(()-> new UrlNotFoundException(shortCode));
-
-        urlData.setActive(true);
-        urlRepo.save(urlData);
-        return "Url enabled successfully";
-    }
-
     public List<UrlMap> getAllUrls(String userName) {
         return urlRepo.findByUserUsername(userName);
     }

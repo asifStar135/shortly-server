@@ -64,16 +64,6 @@ public class UrlController {
         return ResponseEntity.ok(urlService.editUrlDetails(id, request, auth.getName()));
     }
 
-//    @PutMapping("/disable")
-//    ResponseEntity<String> disableUrl(@Valid @RequestBody EditUrlRequest input, Authentication auth){
-//        return ResponseEntity.ok(urlService.disableUrl(input.shortCode(), auth.getName()));
-//    }
-
-//    @PutMapping("/enable")
-//    ResponseEntity<String> enableUrl(@Valid @RequestBody EditUrlRequest input, Authentication auth){
-//        return ResponseEntity.ok(urlService.enableUrl(input.shortCode(), auth.getName()));
-//    }
-
     @DeleteMapping("/{id}")
     ResponseEntity<?> deleteUrl(@PathVariable Long id, Authentication auth){
         urlService.deleteUrl(id, auth.getName());

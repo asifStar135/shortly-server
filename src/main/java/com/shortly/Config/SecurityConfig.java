@@ -48,6 +48,4 @@ public class SecurityConfig {
     public AuthenticationManager getAuthenticationManager(AuthenticationConfiguration authConfig){
         return authConfig.getAuthenticationManager();
     }
-
-
 }
