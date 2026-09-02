@@ -90,12 +90,12 @@ public class UrlService {
         return urlRepo.findByUserUsername(userName);
     }
 
-    public UrlMap getUrlById(Integer id,String userName) {
+    public UrlMap getUrlById(Long id,String userName) {
 
         return urlRepo.findByIdAndUserUsername(id,userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
     }
 
-    public UrlMap editUrlDetails(Integer id, EditUrlRequest request, String username) {
+    public UrlMap editUrlDetails(Long id, EditUrlRequest request, String username) {
         UrlMap urlObj = urlRepo.findByIdAndUserUsername(id, username).orElseThrow(() -> new UrlNotFoundException("Url not found"));
 
         switch (request.editAction()) {

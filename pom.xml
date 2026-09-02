@@ -66,7 +66,6 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-
 <!--        SPRINGBOOT WEB FRAMEWORK-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -160,5 +159,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>
