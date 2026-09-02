@@ -33,8 +33,8 @@ public class UserController {
 
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
                 .httpOnly(true)
-                .secure(env.equals("prod"))
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofMinutes(60))
                 .build();
@@ -49,8 +49,8 @@ public class UserController {
 
         ResponseCookie cookie = ResponseCookie.from("access_token", token)
                 .httpOnly(true)
-                .secure(env.equals("prod"))
-                .sameSite("Lax")
+                .secure(true)
+                .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofMinutes(60))
                 .build();
