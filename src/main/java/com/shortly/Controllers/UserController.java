@@ -17,7 +17,6 @@ import java.time.Duration;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin("http://localhost:3000")
 public class UserController {
 
     private final UserService userService;
@@ -62,11 +61,6 @@ public class UserController {
         String username = auth.getName();
 
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserProfile(username));
-    }
-
-    @PutMapping("/logout")
-    private ResponseEntity<String> logoutUser(){
-        return ResponseEntity.status(HttpStatus.OK).body(userService.logOutUser());
     }
 
     @PutMapping("/profile")

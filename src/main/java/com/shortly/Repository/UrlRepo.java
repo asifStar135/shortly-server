@@ -21,16 +21,11 @@ public interface UrlRepo extends JpaRepository<UrlMap, Long> {
 
     Optional<UrlMap> findById(Long id);
 
-    @Transactional
-    void deleteByShortCode(String shortCode);
-
     List<UrlMap> findByUserUsername(String userName);
 
     Optional<UrlMap> findByIdAndUserUsername(Long id, String userName);
 
     Optional<UrlMap> findByShortCodeAndIsActiveAndUserUsername(String shortCode, boolean b, String username);
-
-    void deleteByShortCodeAndUserUsername(String shortCode, String username);
 
     @Transactional
     void deleteByIdAndUserUsername(Long id, String username);

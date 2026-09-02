@@ -44,24 +44,14 @@ public class UserService {
         newUser.setPassword(encoder.encode(userData.password()));
         newUser.setEmail(userData.email());
 
-        newUser = repo.save(newUser);
+        repo.save(newUser);
         String jwtToken = jwtService.generateToken(userData.username());
 
         return jwtToken;
     }
 
-    public String logOutUser() {
-        return "Logged out";
-    }
-
     public UserProfileWithData getUserProfile(String username) {
          return repo.getUserProfileWithData(username);
-//        User user = repo.findByUsername(username);
-//        user.setPassword(null);
-
-//        repo.getUrlData(user.getUserId());
-
-//        return user;
     }
 
     public User updateUser(String username, UpdateUserRequest request) {
