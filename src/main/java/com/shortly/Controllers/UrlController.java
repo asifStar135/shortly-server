@@ -1,22 +1,16 @@
 package com.shortly.Controllers;
 
+import com.shortly.Utils.ResponseHandler;
+import com.shortly.Utils.ResponseObject;
 import jakarta.validation.Valid;
-import com.shortly.DTO.CreateUrlRequest;
-import com.shortly.DTO.CreateUrlResponse;
-import com.shortly.DTO.EditAction;
-import com.shortly.DTO.EditUrlRequest;
+import com.shortly.DTO.UrlDTOs.CreateUrlRequest;
+import com.shortly.DTO.UrlDTOs.CreateUrlResponse;
+import com.shortly.DTO.UrlDTOs.EditUrlRequest;
 import com.shortly.Models.UrlMap;
 import com.shortly.Services.UrlService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-<<<<<<< Updated upstream
-import java.net.URI;
-import java.net.URISyntaxException;
-=======
->>>>>>> Stashed changes
 import java.util.List;
 
 @RestController
@@ -30,71 +24,34 @@ public class UrlController {
     }
 
     @GetMapping("/")
-<<<<<<< Updated upstream
-    public ResponseEntity<String> checkAPI(){
-=======
-    public ResponseEntity<ResponseObject> checkAPI() {
->>>>>>> Stashed changes
+    public ResponseEntity<ResponseObject> checkAPI(){
         System.out.println("API status checked ✅");
-        return ResponseEntity.ok("Shortly API is running...✅🚀");
+        return ResponseHandler.handleSuccess(200, null, "Shortly API is running...✅🚀");
     }
 
     @GetMapping("/get/{shortCode}")
-<<<<<<< Updated upstream
-    ResponseEntity<?> getUrl(@PathVariable String shortCode) throws URISyntaxException{
-=======
-    ResponseEntity<ResponseObject> getUrl(@PathVariable String shortCode) {
->>>>>>> Stashed changes
+    ResponseEntity<ResponseObject> getUrl(@PathVariable String shortCode){
         String longUrl = urlService.getUrl(shortCode);
 
-        URI targetUri = new URI(longUrl);
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(targetUri)
-                .build();
+        return ResponseHandler.handleRedirect(longUrl);
     }
 
     @PostMapping("/create")
-<<<<<<< Updated upstream
-    ResponseEntity<CreateUrlResponse> createUrl(@Valid @RequestBody CreateUrlRequest urlData,
-                                                Authentication auth){
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(urlService.createUrl(urlData, auth.getName()));
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<UrlMap>> getAllUserURI(Authentication auth){
-        return ResponseEntity.ok(urlService.getAllUrls(auth.getName()));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UrlMap> getUserUri(@PathVariable(value = "id") Long id, Authentication auth){
-        return ResponseEntity.ok(urlService.getUrlById(id, auth.getName()));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<UrlMap> editUrlDetails(@PathVariable(value = "id") Long id,
-                                                 @RequestBody EditUrlRequest request, Authentication auth){
-        return ResponseEntity.ok(urlService.editUrlDetails(id, request, auth.getName()));
-    }
-
-    @DeleteMapping("/{id}")
-    ResponseEntity<?> deleteUrl(@PathVariable Long id, Authentication auth){
-=======
-    ResponseEntity<ResponseObject> createUrl(@Valid @RequestBody CreateUrlRequest urlData, Authentication auth) {
+    ResponseEntity<ResponseObject> createUrl(@Valid @RequestBody CreateUrlRequest urlData, Authentication auth){
         CreateUrlResponse urlDetails = urlService.createUrl(urlData, auth.getName());
 
         return ResponseHandler.handleSuccess(200, urlDetails, "Short URL created successfully");
     }
 
     @GetMapping("/all")
-    public ResponseEntity<ResponseObject> getAllUserURI(Authentication auth) {
+    public ResponseEntity<ResponseObject> getAllUserURI(Authentication auth){
         List<UrlMap> urlList = urlService.getAllUrls(auth.getName());
 
         return ResponseHandler.handleSuccess(200, urlList, "Created URLs fetched");
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ResponseObject> getUserUri(@PathVariable(value = "id") Long id, Authentication auth) {
+    public ResponseEntity<ResponseObject> getUserUri(@PathVariable(value = "id") Long id, Authentication auth){
         UrlMap urlDetails = urlService.getUrlById(id, auth.getName());
 
         return ResponseHandler.handleSuccess(200, urlDetails, "URL details fetched.");
@@ -102,16 +59,15 @@ public class UrlController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ResponseObject> editUrlDetails(@PathVariable(value = "id") Long id,
-                                                         @RequestBody @Valid EditUrlRequest request, Authentication auth) {
-        boolean success = urlService.editUrlDetails(id, request, auth.getName());
+                                                 @RequestBody EditUrlRequest request, Authentication auth){
+        UrlMap updatedUrl = urlService.editUrlDetails(id, request, auth.getName());
 
-        return ResponseHandler.handleSuccess(200, success, "URL details updated");
+        return ResponseHandler.handleSuccess(200, updatedUrl, "URL details updated");
     }
 
     @DeleteMapping("/{id}")
-    ResponseEntity<ResponseObject> deleteUrl(@PathVariable Long id, Authentication auth) {
->>>>>>> Stashed changes
+    ResponseEntity<ResponseObject> deleteUrl(@PathVariable Long id, Authentication auth){
         urlService.deleteUrl(id, auth.getName());
-        return ResponseEntity.noContent().build();
+        return ResponseHandler.handleSuccess(204, null, "URL has been deleted");
     }
 }

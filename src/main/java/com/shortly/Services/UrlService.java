@@ -1,9 +1,8 @@
 package com.shortly.Services;
 
-import com.shortly.DTO.CreateUrlRequest;
-import com.shortly.DTO.CreateUrlResponse;
-import com.shortly.DTO.EditAction;
-import com.shortly.DTO.EditUrlRequest;
+import com.shortly.DTO.UrlDTOs.CreateUrlRequest;
+import com.shortly.DTO.UrlDTOs.CreateUrlResponse;
+import com.shortly.DTO.UrlDTOs.EditUrlRequest;
 import com.shortly.Exceptions.GetUrlNotFoundException;
 import com.shortly.Exceptions.UrlNotFoundException;
 import com.shortly.Models.UrlMap;
@@ -37,11 +36,9 @@ public class UrlService {
         UrlMap urlDetails = urlRepo.findUrlData(shortCode, true, new Date())
                 .orElseThrow(() -> new GetUrlNotFoundException("Wrong short code"));
 
-        try{
-            analyticObject.calculateAnalytics(urlDetails.getId());
-        } catch (Exception e){
-            System.out.println(e.getMessage());
-        }
+        // async calculations
+        analyticObject.calculateAnalytics(urlDetails.getId());
+
         return urlDetails.getLongUrl();
     }
 
@@ -74,7 +71,6 @@ public class UrlService {
 
 <<<<<<< Updated upstream
     public UrlMap getUrlById(Long id,String userName) {
-
         return urlRepo.findByIdAndUserUsername(id,userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
 =======
     public UrlMap getUrlById(Long id, String userName) {

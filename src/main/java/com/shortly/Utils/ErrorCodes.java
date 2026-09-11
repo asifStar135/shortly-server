@@ -4,8 +4,7 @@ import java.util.Map;
 
 public final class ErrorCodes {
 
-    private ErrorCodes() {
-    }
+    private ErrorCodes() {}
 
     public static final String URL_NOT_FOUND = "URL_NOT_FOUND";
     public static final String URL_EXPIRED = "URL_EXPIRED";

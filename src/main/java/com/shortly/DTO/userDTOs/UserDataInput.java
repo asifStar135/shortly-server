@@ -1,20 +1,16 @@
-package com.shortly.DTO;
+package com.shortly.DTO.userDTOs;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import org.hibernate.validator.constraints.Length;
 
 public record UserDataInput(
-        @NotBlank
+        @NotBlank(message = "Username is required")
         String username,
-<<<<<<< Updated upstream:src/main/java/com/shortly/DTO/UserDataInput.java
-        @NotBlank
-=======
         @NotBlank(message = "Password is required")
         @Length(min = 8, message = "Password must be 8 characters long !")
->>>>>>> Stashed changes:src/main/java/com/shortly/DTO/userDTOs/UserDataInput.java
         String password,
-        @Email
+        @Email(message = "Enter a valid email")
         String email
 ) {
 }

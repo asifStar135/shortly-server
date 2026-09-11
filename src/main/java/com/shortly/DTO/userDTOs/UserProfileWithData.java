@@ -1,4 +1,4 @@
-package com.shortly.DTO;
+package com.shortly.DTO.userDTOs;
 
 
 import java.util.Date;
