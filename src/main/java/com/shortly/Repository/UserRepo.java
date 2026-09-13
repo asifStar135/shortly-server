@@ -15,10 +15,17 @@ public interface UserRepo extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
 
     @Query("""
+<<<<<<< Updated upstream
         SELECT new com.shortly.DTO.UserProfileWithData(
             usr.userId, usr.username, usr.email, usr.createdAt, usr.updatedAt,
                 COUNT(url.id), COALESCE(SUM(url.visit), 0),
                 SUM(CASE WHEN url.isActive = true THEN 1 END))
+=======
+                SELECT new com.shortly.DTO.userDTOs.UserProfileWithData(
+                usr.userId, usr.username, usr.email, usr.createdAt, usr.updatedAt,
+                COALESCE(COUNT(url.id), 0), COALESCE(SUM(url.visit), 0),
+                SUM(CASE WHEN url.isActive = true THEN 1 ELSE 0 END))
+>>>>>>> Stashed changes
                 FROM User usr
                 LEFT JOIN UrlMap url on url.user.id = usr.id
                 where usr.username = :username
