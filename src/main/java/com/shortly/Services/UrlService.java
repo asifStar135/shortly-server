@@ -26,7 +26,7 @@ public class UrlService {
     private final UserRepo userRepo;
     private final Base62 base62Encoder;
 
-    public UrlService(UrlRepo repo, UserRepo userRepo, Analytics analytics, Base62 base62){
+    public UrlService(UrlRepo repo, UserRepo userRepo, Analytics analytics, Base62 base62) {
         this.analyticObject = analytics;
         this.urlRepo = repo;
         this.userRepo = userRepo;
@@ -72,12 +72,17 @@ public class UrlService {
         return urlRepo.findByUserUsername(userName);
     }
 
+<<<<<<< Updated upstream
     public UrlMap getUrlById(Long id,String userName) {
 
         return urlRepo.findByIdAndUserUsername(id,userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
+=======
+    public UrlMap getUrlById(Long id, String userName) {
+        return urlRepo.findByIdAndUserUsername(id, userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
+>>>>>>> Stashed changes
     }
 
-    public UrlMap editUrlDetails(Long id, EditUrlRequest request, String username) {
+    public boolean editUrlDetails(Long id, EditUrlRequest request, String username) {
         UrlMap urlObj = urlRepo.findByIdAndUserUsername(id, username).orElseThrow(() -> new UrlNotFoundException("Url not found"));
 
         switch (request.editAction()) {
@@ -88,6 +93,7 @@ public class UrlService {
             case EXPIRES -> urlObj.setExpiresAt(request.expires());
         }
 
-        return urlRepo.save(urlObj);
+        urlRepo.save(urlObj);
+        return true;
     }
 }
