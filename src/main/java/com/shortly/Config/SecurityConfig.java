@@ -23,6 +23,16 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    // Define this at the top of your SecurityConfig class
+    private static final String[] PUBLIC_URLS = {
+            "/api/user/login",
+            "/api/user/register",
+            "/api/user/forgot-password",
+            "/api/user/reset-password",
+            "/api/url/get/{shortCode}",
+            "/api/url/"
+    };
+
     @Bean
     public SecurityFilterChain securityFilter(HttpSecurity httpSec){
         return httpSec.csrf(csrf -> csrf.disable())
@@ -30,8 +40,7 @@ public class SecurityConfig {
 //                .sessionManagement(session ->
 //                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(request ->
-                        request.requestMatchers("/api/user/login", "/api/user/register", "/api/url/get/{shortCode}", "/api/url/")
-                                .permitAll().anyRequest().authenticated()
+                        request.requestMatchers(PUBLIC_URLS).permitAll().anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();

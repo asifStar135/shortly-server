@@ -1,69 +1,70 @@
 package com.shortly.Services;
 
-import com.shortly.DTO.UpdateUserRequest;
-import com.shortly.DTO.UserDataInput;
-import com.shortly.DTO.UserProfileWithData;
+import com.shortly.DTO.userDTOs.UpdateUserRequest;
+import com.shortly.DTO.userDTOs.UserDataInput;
+import com.shortly.DTO.userDTOs.UserProfileWithData;
+import com.shortly.Exceptions.BadRequestException;
+import com.shortly.Models.ResetToken;
 import com.shortly.Models.User;
+import com.shortly.Repository.ResetTokenRepo;
 import com.shortly.Repository.UserRepo;
+import com.shortly.Utils.CodeGenerator;
+import com.shortly.Utils.EmailEngine;
+import com.shortly.Utils.ErrorCodes;
+import jakarta.transaction.Transactional;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.DigestUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class UserService {
     private final UserRepo repo;
+    private final ResetTokenRepo tokenRepo;
     private final AuthenticationManager authManager;
     private final JwtService jwtService;
+    private final EmailEngine mailSender;
 
-<<<<<<< Updated upstream
-    public UserService(UserRepo repo, AuthenticationManager authManager, JwtService service){
-=======
-    public UserService(UserRepo repo, AuthenticationManager authManager, JwtService service, EmailEngine mail, ResetTokenRepo tokenRepo) {
->>>>>>> Stashed changes
+    public UserService(UserRepo repo, AuthenticationManager authManager, JwtService service, EmailEngine mail, ResetTokenRepo tokenRepo){
         this.jwtService = service;
         this.authManager = authManager;
         this.repo = repo;
+        this.tokenRepo = tokenRepo;
+        this.mailSender = mail;
     }
 
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     public String userLogin(UserDataInput userData) {
-        Authentication auth = authManager.authenticate(
+        authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(userData.username(), userData.password())
         );
 
-        if(auth.isAuthenticated()){
-            return jwtService.generateToken(userData.username());
-        }
-        return "User authentication failed !";
+        return jwtService.generateToken(userData.username());
     }
 
-<<<<<<< Updated upstream
-    public String registerUser(UserDataInput userData) {
-=======
     public String registerUser(UserDataInput request) {
         // Check existing username and email
         List<User> ifExist = repo.findByUsernameOrEmail(request.username(), request.email());
 
-        if (!ifExist.isEmpty()) {
+        if (!ifExist.isEmpty()){
             boolean isUsername = ifExist.get(0).getUsername().equals(request.username());
             throw new BadRequestException(isUsername ? ErrorCodes.USERNAME_EXISTS : ErrorCodes.EMAIL_EXISTS);
         }
 
->>>>>>> Stashed changes
         User newUser = new User();
 
-        newUser.setUsername(userData.username());
-        newUser.setPassword(encoder.encode(userData.password()));
-        newUser.setEmail(userData.email());
+        newUser.setUsername(request.username());
+        newUser.setPassword(encoder.encode(request.password()));
+        newUser.setEmail(request.email());
 
         repo.save(newUser);
-        String jwtToken = jwtService.generateToken(userData.username());
-
-        return jwtToken;
+        return jwtService.generateToken(request.username());
     }
 
     public UserProfileWithData getUserProfile(String username) {
@@ -74,46 +75,27 @@ public class UserService {
         User user = repo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        // ignored for now...
+        List<User> ifExist = repo.findByUsernameOrEmail(request.username(), request.email());
 
-<<<<<<< Updated upstream
-        // Check if new username is already taken
-//        if (!user.getUsername().equals(request.getUsername())
-//                && userRepository.existsByUsername(request.getUsername())) {
-//            throw new RuntimeException("Username already exists");
-//        }
-//          Check if new email is already taken
-//        if (!user.getEmail().equals(request.getEmail())
-//                && userRepository.existsByEmail(request.getEmail())) {
-//            throw new RuntimeException("Email already exists");
-//        }
-
-        user.setUsername(request.username());
-        user.setEmail(request.email());
-=======
-        if (!ifExist.isEmpty()) {
+        if (!ifExist.isEmpty()){
             boolean isUsername = ifExist.get(0).getUsername().equals(request.username());
             throw new BadRequestException(isUsername ? ErrorCodes.USERNAME_EXISTS : ErrorCodes.EMAIL_EXISTS);
         }
 
-        if (request.isUsername()) {
+        if(request.isUsername()){
             user.setUsername(request.username());
         } else {
             user.setEmail(request.email());
         }
->>>>>>> Stashed changes
 
         return repo.save(user);
     }
 
-    public String deleteUser(String username) {
+    public void deleteUser(String username) {
         User user = repo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         repo.delete(user);
-<<<<<<< Updated upstream
-        return "User deleted successfully";
-=======
     }
 
     public void initiatePasswordReset(String email) {
@@ -121,7 +103,7 @@ public class UserService {
 
         if (user == null) {
             // Return early or throw generic success to avoid email enumeration attacks
-            return;
+             return ;
         }
 
         String rawCode = CodeGenerator.generate6DigitCode();
@@ -144,34 +126,36 @@ public class UserService {
 
         User user = repo.findByEmail(email)
                 .orElseThrow(() ->
-                        new BadRequestException(ErrorCodes.INVALID_CODE));
+                        new BadRequestException("Invalid reset request"));
 
-        List<ResetToken> tokens =
-                tokenRepo.findByUserAndUsed(user, false);
+        ResetToken token =
+                tokenRepo.findByUser(user)
+                        .orElseThrow(() ->
+                                new BadRequestException("Invalid reset request"));
 
-        if (tokens.size() == 0) {
-            throw new BadRequestException(ErrorCodes.INVALID_CODE);
+        // A used token can never be reused.
+        if (token.isUsed()) {
+            throw new BadRequestException("Invalid reset request");
         }
-        ResetToken token = tokens.get(0);
 
         // Prevent brute-force attempts against the OTP.
         if (token.getAttempts() >= 5) {
-            throw new BadRequestException(ErrorCodes.TOO_MANY_ATTEMPTS);
+            throw new BadRequestException("Too many attempts");
         }
 
         // OTP expires after 10 minutes.
         if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException(ErrorCodes.INVALID_CODE);
+            throw new BadRequestException("Reset code expired");
         }
 
         // Hash the user-provided code and compare it with
         // the hash stored in the database.
-        if (!encoder.matches(code, token.getTokenHash())) {
+        if(!encoder.matches(code, token.getTokenHash())){
             // Increment failed attempts before rejecting the request.
             token.setAttempts(token.getAttempts() + 1);
             tokenRepo.save(token);
 
-            throw new BadRequestException(ErrorCodes.INVALID_CREDENTIALS);
+            throw new BadRequestException("Invalid reset code");
         }
 
         // Always hash passwords using Spring's PasswordEncoder.
@@ -181,6 +165,5 @@ public class UserService {
         // Make the reset token single-use.
         token.setUsed(true);
         tokenRepo.save(token);
->>>>>>> Stashed changes
     }
 }

@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-
 @Component
 public class Analytics {
     @Autowired
@@ -17,6 +15,7 @@ public class Analytics {
     @Async
     public void calculateAnalytics(Long urlId ){
         try{
+            Thread.sleep(1000);
 
             UrlMap urlObj = urlRepo.findById(urlId).orElseThrow(() -> new UrlNotFoundException(urlId+""));
 
@@ -26,7 +25,6 @@ public class Analytics {
             // OTHER ANALYTICS CALCULATION FOR HITTING A URL
 
 //            System.out.println(new Date(System.currentTimeMillis()).getTime() + "-> above sleep");
-            Thread.sleep(3000);
 //            System.out.println(new Date(System.currentTimeMillis()).getTime() + "-> below sleep");
         } catch (Exception e){
             System.out.println(e.getMessage());
