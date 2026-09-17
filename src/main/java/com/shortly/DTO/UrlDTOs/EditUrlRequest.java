@@ -1,7 +1,7 @@
 package com.shortly.DTO.UrlDTOs;
 
+import com.shortly.DTO.Enums.EditAction;
 import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
 
 import java.util.Date;
 

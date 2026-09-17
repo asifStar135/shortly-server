@@ -1,6 +1,5 @@
 package com.shortly.DTO.userDTOs;
 
-
 import java.util.Date;
 
 public record UserProfileWithData(

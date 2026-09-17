@@ -23,7 +23,6 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
-    // Define this at the top of your SecurityConfig class
     private static final String[] PUBLIC_URLS = {
             "/api/user/login",
             "/api/user/register",
@@ -34,7 +33,7 @@ public class SecurityConfig {
     };
 
     @Bean
-    public SecurityFilterChain securityFilter(HttpSecurity httpSec){
+    public SecurityFilterChain securityFilter(HttpSecurity httpSec) {
         return httpSec.csrf(csrf -> csrf.disable())
                 .cors(Customizer.withDefaults())
 //                .sessionManagement(session ->
@@ -47,14 +46,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider provider(){
+    public AuthenticationProvider provider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailService);
         authProvider.setPasswordEncoder(new BCryptPasswordEncoder());
         return authProvider;
     }
 
     @Bean
-    public AuthenticationManager getAuthenticationManager(AuthenticationConfiguration authConfig){
+    public AuthenticationManager getAuthenticationManager(AuthenticationConfiguration authConfig) {
         return authConfig.getAuthenticationManager();
     }
 }

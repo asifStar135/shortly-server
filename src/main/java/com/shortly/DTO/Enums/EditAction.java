@@ -1,4 +1,4 @@
-package com.shortly.DTO.UrlDTOs;
+package com.shortly.DTO.Enums;
 
 public enum EditAction {
     ENABLE,
