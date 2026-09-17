@@ -15,26 +15,27 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    public UserController(UserService service){
+
+    public UserController(UserService service) {
         this.userService = service;
     }
 
     @PostMapping("/login")
-    private ResponseEntity<ResponseObject> userLogin(@Valid @RequestBody UserDataInput userData){
+    private ResponseEntity<ResponseObject> userLogin(@Valid @RequestBody UserDataInput userData) {
         String token = userService.userLogin(userData);
 
         return ResponseHandler.handleSuccess(200, null, "Logged in successfully.", token);
     }
 
     @PostMapping("/register")
-    private ResponseEntity<ResponseObject> registerUser(@Valid @RequestBody UserDataInput userData){
+    private ResponseEntity<ResponseObject> registerUser(@Valid @RequestBody UserDataInput userData) {
         String token = userService.registerUser(userData);
 
         return ResponseHandler.handleSuccess(200, null, "Signed up successfully.", token);
     }
 
     @GetMapping("/profile")
-    private ResponseEntity<ResponseObject> getProfile(Authentication auth){
+    private ResponseEntity<ResponseObject> getProfile(Authentication auth) {
         String username = auth.getName();
 
         UserProfileWithData data = userService.getUserProfile(username);
@@ -54,12 +55,12 @@ public class UserController {
         return ResponseHandler.handleSuccess(200, null, "User deleted successfully");
     }
 
-    // Step A: Request Code
+    // Step A: Request Code with new password & email
     @PostMapping("/forgot-password")
     public ResponseEntity<ResponseObject> forgotPassword(@RequestBody @Valid ForgotPassword request) {
-         userService.initiatePasswordReset(request.email());
+        userService.initiatePasswordReset(request.email());
 
-         return ResponseHandler.handleSuccess(200, null, "A verification code has been sent to your email");
+        return ResponseHandler.handleSuccess(200, null, "A verification code has been sent to your email");
     }
 
     // Step B: Submit Code
@@ -68,11 +69,4 @@ public class UserController {
         userService.resetPassword(request.email(), request.code(), request.newPassword());
         return ResponseHandler.handleSuccess(200, null, "Password has been reset successfully");
     }
-
-    // Step C: Reset Password using the Reset Token
-//    @PostMapping("/reset-password")
-//    public ResponseEntity<String> resetPassword(@RequestBody ResetPasswordDto dto) {
-//        // Validate resetToken, then encode and update the user's password in database
-//        return ResponseEntity.ok("Password updated successfully.");
-//    }
 }

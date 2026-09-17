@@ -1,16 +1,13 @@
 package com.shortly.Services;
 
-import com.shortly.DTO.UrlDTOs.CreateUrlRequest;
-import com.shortly.DTO.UrlDTOs.CreateUrlResponse;
-import com.shortly.DTO.UrlDTOs.EditUrlRequest;
+import com.shortly.DTO.UrlDTOs.*;
 import com.shortly.Exceptions.GetUrlNotFoundException;
 import com.shortly.Exceptions.UrlNotFoundException;
 import com.shortly.Models.UrlMap;
 import com.shortly.Models.User;
 import com.shortly.Repository.UrlRepo;
 import com.shortly.Repository.UserRepo;
-import com.shortly.Utils.Analytics;
-import com.shortly.Utils.Base62;
+import com.shortly.Utils.UtilMethods;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -21,28 +18,21 @@ import java.util.List;
 public class UrlService {
 
     private final UrlRepo urlRepo;
-    private final Analytics analyticObject;
     private final UserRepo userRepo;
-    private final Base62 base62Encoder;
 
-    public UrlService(UrlRepo repo, UserRepo userRepo, Analytics analytics, Base62 base62) {
-        this.analyticObject = analytics;
+    public UrlService(UrlRepo repo, UserRepo userRepo) {
         this.urlRepo = repo;
         this.userRepo = userRepo;
-        this.base62Encoder = base62;
     }
 
     public String getUrl(String shortCode) {
         UrlMap urlDetails = urlRepo.findUrlData(shortCode, true, new Date())
                 .orElseThrow(() -> new GetUrlNotFoundException("Wrong short code"));
 
-        // async calculations
-        analyticObject.calculateAnalytics(urlDetails.getId());
-
         return urlDetails.getLongUrl();
     }
 
-    public CreateUrlResponse createUrl(CreateUrlRequest urlData, String username) {
+    public boolean createUrl(CreateUrlRequest urlData, String username) {
         User loggedInUser = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -53,33 +43,37 @@ public class UrlService {
         newUrl.setUser(loggedInUser);
 
         newUrl = urlRepo.save(newUrl);
-        String shortCode = base62Encoder.encode(newUrl.getId());
+        String shortCode = UtilMethods.encodeBase62(newUrl.getId());
         newUrl.setShortCode(shortCode);
         urlRepo.save(newUrl);
 
-        return new CreateUrlResponse(newUrl.getId(), shortCode, newUrl.getLongUrl(), true,
-                newUrl.getExpiresAt(), newUrl.getUpdatedAt(), newUrl.getCreatedAt(), loggedInUser.getUserId());
+        return true;
     }
 
     public void deleteUrl(Long id, String username) {
         urlRepo.deleteByIdAndUserUsername(id, username);
     }
 
-    public List<UrlMap> getAllUrls(String userName) {
-        return urlRepo.findByUserUsername(userName);
+    public List<UrlListItem> getAllUrls(String username) {
+        return urlRepo.findUrlList(username);
     }
 
-<<<<<<< Updated upstream
-    public UrlMap getUrlById(Long id,String userName) {
-        return urlRepo.findByIdAndUserUsername(id,userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
-=======
-    public UrlMap getUrlById(Long id, String userName) {
-        return urlRepo.findByIdAndUserUsername(id, userName).orElseThrow(() -> new UrlNotFoundException("Url not found"));
->>>>>>> Stashed changes
+    public UrlItemResponse getUrlDataById(Long id, String username) {
+        UrlItemBase urlItemBase = urlRepo.getUrlItemWithData(id, username);
+
+        List<VisitByCity> city_visits = urlRepo.getVisitsByCity(id);
+        List<VisitByDevice> device_visits = urlRepo.getVisitsByDevice(id);
+
+        return new UrlItemResponse(
+                urlItemBase.id(), urlItemBase.title(), urlItemBase.shortCode(), urlItemBase.longUrl(),
+                urlItemBase.isActive(), urlItemBase.expiresAt(), urlItemBase.createdAt(), urlItemBase.updatedAt(),
+                urlItemBase.total_visit(), urlItemBase.unique_visit(), urlItemBase.today_visit(),
+                city_visits, device_visits
+        );
     }
 
     public boolean editUrlDetails(Long id, EditUrlRequest request, String username) {
-        UrlMap urlObj = urlRepo.findByIdAndUserUsername(id, username).orElseThrow(() -> new UrlNotFoundException("Url not found"));
+        UrlMap urlObj = urlRepo.findByIdAndUserUsername(id, username).orElseThrow(() -> new UrlNotFoundException());
 
         switch (request.editAction()) {
             case ENABLE -> urlObj.setActive(true);

@@ -24,14 +24,17 @@ RUN ./mvnw clean package -DskipTests
 
 FROM eclipse-temurin:21-jre
 
+RUN apt-get update && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY --from=builder app/target/*.jar app.jar
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 ENV PORT=8080
 
 EXPOSE 8080
 
-#Start command
-
-CMD ["sh", "-c", "java -jar app.jar --server.port=${PORT}"]
+ENTRYPOINT ["./entrypoint.sh"]

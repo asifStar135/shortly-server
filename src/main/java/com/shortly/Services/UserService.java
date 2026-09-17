@@ -17,8 +17,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -30,7 +28,7 @@ public class UserService {
     private final JwtService jwtService;
     private final EmailEngine mailSender;
 
-    public UserService(UserRepo repo, AuthenticationManager authManager, JwtService service, EmailEngine mail, ResetTokenRepo tokenRepo){
+    public UserService(UserRepo repo, AuthenticationManager authManager, JwtService service, EmailEngine mail, ResetTokenRepo tokenRepo) {
         this.jwtService = service;
         this.authManager = authManager;
         this.repo = repo;
@@ -52,7 +50,7 @@ public class UserService {
         // Check existing username and email
         List<User> ifExist = repo.findByUsernameOrEmail(request.username(), request.email());
 
-        if (!ifExist.isEmpty()){
+        if (!ifExist.isEmpty()) {
             boolean isUsername = ifExist.get(0).getUsername().equals(request.username());
             throw new BadRequestException(isUsername ? ErrorCodes.USERNAME_EXISTS : ErrorCodes.EMAIL_EXISTS);
         }
@@ -77,12 +75,12 @@ public class UserService {
 
         List<User> ifExist = repo.findByUsernameOrEmail(request.username(), request.email());
 
-        if (!ifExist.isEmpty()){
+        if (!ifExist.isEmpty()) {
             boolean isUsername = ifExist.get(0).getUsername().equals(request.username());
             throw new BadRequestException(isUsername ? ErrorCodes.USERNAME_EXISTS : ErrorCodes.EMAIL_EXISTS);
         }
 
-        if(request.isUsername()){
+        if (request.isUsername()) {
             user.setUsername(request.username());
         } else {
             user.setEmail(request.email());
@@ -103,7 +101,7 @@ public class UserService {
 
         if (user == null) {
             // Return early or throw generic success to avoid email enumeration attacks
-             return ;
+            return;
         }
 
         String rawCode = CodeGenerator.generate6DigitCode();
@@ -126,36 +124,34 @@ public class UserService {
 
         User user = repo.findByEmail(email)
                 .orElseThrow(() ->
-                        new BadRequestException("Invalid reset request"));
+                        new BadRequestException(ErrorCodes.INVALID_CODE));
 
-        ResetToken token =
-                tokenRepo.findByUser(user)
-                        .orElseThrow(() ->
-                                new BadRequestException("Invalid reset request"));
+        List<ResetToken> tokens =
+                tokenRepo.findByUserAndUsed(user, false);
 
-        // A used token can never be reused.
-        if (token.isUsed()) {
-            throw new BadRequestException("Invalid reset request");
+        if (tokens.isEmpty()) {
+            throw new BadRequestException(ErrorCodes.INVALID_CODE);
         }
+        ResetToken token = tokens.get(0);
 
         // Prevent brute-force attempts against the OTP.
         if (token.getAttempts() >= 5) {
-            throw new BadRequestException("Too many attempts");
+            throw new BadRequestException(ErrorCodes.TOO_MANY_ATTEMPTS);
         }
 
         // OTP expires after 10 minutes.
         if (token.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new BadRequestException("Reset code expired");
+            throw new BadRequestException(ErrorCodes.INVALID_CODE);
         }
 
         // Hash the user-provided code and compare it with
         // the hash stored in the database.
-        if(!encoder.matches(code, token.getTokenHash())){
+        if (!encoder.matches(code, token.getTokenHash())) {
             // Increment failed attempts before rejecting the request.
             token.setAttempts(token.getAttempts() + 1);
             tokenRepo.save(token);
 
-            throw new BadRequestException("Invalid reset code");
+            throw new BadRequestException(ErrorCodes.INVALID_CREDENTIALS);
         }
 
         // Always hash passwords using Spring's PasswordEncoder.
